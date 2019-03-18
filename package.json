@@ -1,0 +1,14 @@
+{
+  "dependencies": {
+    "@google-cloud/logging-winston": "^0.11.0",
+    "async-local-storage": "^2.1.0",
+    "ulid": "^2.3.0",
+    "winston": "^3.2.1"
+  },
+  "name": "service-logger",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "repository": "https://nodehoster@github.com/nodehoster/service-logger.git",
+  "author": "nodehoster <45132291+nodehoster@users.noreply.github.com>",
+  "license": "MIT"
+}
