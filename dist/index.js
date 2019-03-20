@@ -17,19 +17,34 @@ let _service;
 als.enable();
 exports.default = {
     // init can happen on every request or on service startup
-    init: (service) => {
-        _service = service;
-        const stackdriverTransport = new logging_winston_1.LoggingWinston({
-            serviceContext: { service }
+    init: (service, enabledTransports = ['console'], options = {}) => {
+        let transports = [];
+        enabledTransports.map(transport => {
+            switch (transport) {
+                case 'console':
+                    transports.push(new winston.transports.Console({
+                        format: winston.format.simple()
+                    }));
+                    break;
+                case 'mysql':
+                    const mysqlTransport = require('winston-mysql');
+                    transports.push(new mysqlTransport(options['mysql']));
+                    break;
+                case 'mongo':
+                    require('winston-mongodb');
+                    // @ts-ignore
+                    transports.push(new winston.transports.MongoDB(options['mongo']));
+                case 'stackdriver':
+                    transports.push(new logging_winston_1.LoggingWinston({
+                        serviceContext: { service }
+                    }));
+                    break;
+            }
         });
+        _service = service;
         _logger = winston.createLogger({
             level: 'info',
-            transports: [
-                stackdriverTransport
-                // new winston.transports.Console({
-                //   format: winston.format.simple()
-                // })
-            ],
+            transports,
             defaultMeta: {
                 service
             }
