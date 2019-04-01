@@ -52,28 +52,48 @@ exports.default = {
     },
     // used to link all the following logs to the correlation id and eventually if on GAE to the trace ID
     linkRequest: (headers) => {
-        const requestID = headers['x-request-id'] || _service + '-' + ulid_1.ulid();
-        als.set('request_id', requestID);
-        let gTrace = {};
-        if (process.env.GOOGLE_CLOUD_PROJECT) {
-            const gTraceHeader = headers['x-cloud-trace-context'];
-            const gTraceID = gTraceHeader ? gTraceHeader.split('/')[0] : '';
-            gTrace = {
-                LOGGING_TRACE_KEY: `projects/${process.env.GOOGLE_CLOUD_PROJECT}/traces/${gTraceID}`
-            };
-            als.set('g-trace', gTrace[logging_winston_1.LOGGING_TRACE_KEY]);
+        try {
+            const requestID = headers['x-request-id'] || _service + '-' + ulid_1.ulid();
+            als.set('request_id', requestID);
+            let gTrace = {};
+            if (process.env.GOOGLE_CLOUD_PROJECT) {
+                const gTraceHeader = headers['x-cloud-trace-context'];
+                const gTraceID = gTraceHeader ? gTraceHeader.split('/')[0] : '';
+                gTrace = {
+                    LOGGING_TRACE_KEY: `projects/${process.env.GOOGLE_CLOUD_PROJECT}/traces/${gTraceID}`
+                };
+                als.set('g-trace', gTrace[logging_winston_1.LOGGING_TRACE_KEY]);
+            }
+            else {
+                als.set('g-trace', '');
+            }
         }
-        else {
-            als.set('g-trace', '');
+        catch (err) {
+            console.error(err);
         }
     },
-    log: (level, message, event, scope, meta = {}) => __awaiter(this, void 0, void 0, function* () {
-        // trace id linking (if too slow, check env GOOGLE_CLOUD_PROJECT instead of getting als)
-        let gTrace = als.get('g-trace');
-        gTrace = gTrace !== '' ? {
-            LOGGING_TRACE_KEY: gTrace
-        } : {};
-        _logger.log(level, message, Object.assign({}, meta, { context: Object.assign({}, meta.context, { id: als.get('request_id'), event, scope: scope.replace(' ', '').split(',') }) }, gTrace));
+    log: (level, message, event, scope, meta = { context: {} }) => __awaiter(this, void 0, void 0, function* () {
+        try {
+            // trace id linking (if too slow, check env GOOGLE_CLOUD_PROJECT instead of getting als)
+            let gTrace = als.get('g-trace');
+            gTrace = gTrace !== '' ? {
+                LOGGING_TRACE_KEY: gTrace
+            } : {};
+            let parsedMessage;
+            try {
+                parsedMessage = message.replace(/{(.*?)}/g, (match) => {
+                    // @ts-ignore
+                    return meta.context[match.replace(/{|}/g, "")];
+                });
+            }
+            catch (e) {
+                parsedMessage = message;
+            }
+            _logger.log(level, parsedMessage, Object.assign({}, meta, { context: Object.assign({}, meta.context, { id: als.get('request_id'), event, scope: scope.replace(' ', '').split(',') }) }, gTrace));
+        }
+        catch (err) {
+            console.error(err);
+        }
     })
 };
 //# sourceMappingURL=index.js.map
