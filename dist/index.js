@@ -73,17 +73,7 @@ exports.default = {
         gTrace = gTrace !== '' ? {
             LOGGING_TRACE_KEY: gTrace
         } : {};
-        let parsedMessage;
-        try {
-            parsedMessage = message.replace(/{(.*?)}/g, (match) => {
-                // @ts-ignore
-                return meta.context[match.replace(/{|}/g, "")];
-            });
-        }
-        catch (e) {
-            parsedMessage = message;
-        }
-        _logger.log(level, parsedMessage, Object.assign({}, meta, { context: Object.assign({}, meta.context, { id: als.get('request_id'), event, scope: scope.replace(' ', '').split(',') }) }, gTrace));
+        _logger.log(level, message, Object.assign({}, meta, { context: Object.assign({}, meta.context, { id: als.get('request_id'), event, scope: scope.replace(' ', '').split(',') }) }, gTrace));
     })
 };
 //# sourceMappingURL=index.js.map
