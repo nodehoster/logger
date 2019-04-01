@@ -70,7 +70,17 @@ export default {
       LOGGING_TRACE_KEY: gTrace
     } : {}
 
-    _logger.log(level, message, { ...meta, context: {
+    let parsedMessage
+    try {
+      parsedMessage = message.replace(/{(.*?)}/g, (match) => {
+        // @ts-ignore
+        return meta.context[match.replace(/{|}/g, "")]
+      });
+    } catch (e) {
+      parsedMessage = message
+    }
+
+    _logger.log(level, parsedMessage, { ...meta, context: {
       ...meta.context,
       id: als.get('request_id'),
       event,
