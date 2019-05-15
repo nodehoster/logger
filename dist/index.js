@@ -72,8 +72,9 @@ exports.default = {
             console.error(err);
         }
     },
-    log: (level, message, event, scope, meta = { context: {} }) => __awaiter(this, void 0, void 0, function* () {
+    log: (level, message, event, scope, meta = { context: {} }, context = {}) => __awaiter(this, void 0, void 0, function* () {
         try {
+            meta.context = Object.assign({}, meta.context, context);
             // trace id linking (if too slow, check env GOOGLE_CLOUD_PROJECT instead of getting als)
             let gTrace = als.get('g-trace');
             gTrace = gTrace !== '' ? {

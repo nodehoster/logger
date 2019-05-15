@@ -67,8 +67,12 @@ export default {
     }
   },
 
-  log: async (level: string, message: string, event: string, scope: string, meta: any = { context: {} }) => {
+  log: async (level: string, message: string, event: string, scope: string, meta: any = { context: {} }, context: any = {}) => {
     try {
+      meta.context = {
+        ...meta.context,
+        ...context
+      }
       // trace id linking (if too slow, check env GOOGLE_CLOUD_PROJECT instead of getting als)
       let gTrace = als.get('g-trace')
       gTrace = gTrace !== '' ? {
