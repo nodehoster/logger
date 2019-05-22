@@ -29,6 +29,7 @@ export default {
           transports.push(new winston.transports.MongoDB(options['mongo']))
         case 'stackdriver':
           transports.push(new LoggingWinston({
+            logName: `${service}_log`,
             serviceContext: { service }
           }))
           break

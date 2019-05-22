@@ -36,6 +36,7 @@ exports.default = {
                     transports.push(new winston.transports.MongoDB(options['mongo']));
                 case 'stackdriver':
                     transports.push(new logging_winston_1.LoggingWinston({
+                        logName: `${service}_log`,
                         serviceContext: { service }
                     }));
                     break;
