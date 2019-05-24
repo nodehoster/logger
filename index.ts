@@ -90,7 +90,7 @@ export default {
           parsedMessage = message
       }
 
-      _logger.log(level, parsedMessage, { ...meta, context: {
+      _logger.log(level, `${this._service.toUpperCase()}: ${parsedMessage}`, { ...meta, context: {
         ...meta.context,
         id: als.get('request_id'),
         event,
